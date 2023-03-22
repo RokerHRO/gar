@@ -36,7 +36,7 @@ Every codec ensures, that no file content can be encoded into output that can be
 
 The header consists of one line, terminated by newline:
 
-* `<#gar#2.0#` _codec_ [`#` _parameters_ ] `#>`
+> `<#gar#2.0#` _codec_ [`#` _parameters_ ] `#>`
 
 * The spaces shown in the header line are just for illustration.
 * The parameters are optional and codec-specific.
@@ -46,7 +46,7 @@ The header consists of one line, terminated by newline:
 
 Every gar file ends with a footer line, terminated also by a newline:
 
-* `<#endgar` [`#sha256=` _sha256-sum_ ] `#>` 
+> `<#endgar` [`#sha256=` _sha256-sum_ ] `#>` 
 
 * The spaces shown in the footer line are just for illustration.
 * The SHA-256 sum is optional. It is computed on the original (unencoded) file content and might either be 64 hex digits (0-9a-f), or truncated to the first 16 or 32 hex digits.
@@ -56,10 +56,34 @@ Every gar file ends with a footer line, terminated also by a newline:
 
 A chunk header consists of one line, terminated by newline:
 
-* `<|` _codec_ [ `|` _parameters_ ] [ `|"` _chunkname_ `"` ] `|>`
+> `<|` _codec_ [ `|` _parameters_ ] [ `|"` _chunkname_ `"` ] `|>`
 
 * The spaces shown in the footer line are just for illustration.
 * The parameters are optional and a comma-separated key-value list. Their meaning is codec-specific.
 * The chunk name is optional and a JSON string in double-quotes.
 * The "newline" might be a single NL character or a CR-NL sequence.
 * There is no "chunk footer".
+
+### Codecs
+
+#### plain – plaintext
+* This is used for every data that is considered as "plaintext", e.g. source code
+* If the data contain lines that parses as gar header or footer lines these lines are escaped in a special way:
+  `~(` _line_ `)~`
+  Optionally overlong lines can be escaped the same way and folded at a suitable position.
+
+#### siso93 – tagged encoding for arbitrary binary data
+* All data that is not "plaintext" – and doesn't have a format-specific codec – is considered as "binary" data and encoded with this codec.
+* Unlike base64 or base85 this encoding keeps ASCII text snippets in the data human-readable. To make it diff-friendly (a local change, insertion od deletion of data results in a small diff) a special encoding is used:
+* * A rolling checksum is used to split the data in content-dependent chunks. The minimum & maximum lenghts of the chunks can be configured.
+* * Within each chunk every 4 (binary data) octets are encoded into 1 "tag" char and 4 "data" chars. These chars are only printable ASCII chars.
+* * Each chunk is encoded in one "tag line", followed by one "data line".
+
+#### xmltidy - pretty-printed XML
+* XML data that is stored "pretty-printed" with proper line breaks and indentation, making it diff-friendly
+* Because the original layout of the XML data is lost, **this codec is not reversible!**
+
+#### jsontidy – pretty-printed JSON
+* JSON data that is stored "pretty-printed" with proper line breaks and indentation, making it diff-friendly
+* Because the original layout of the JSON data is lost, **this codec is not reversible!**
+
