@@ -18,10 +18,36 @@ First goal is to enable this for XML-based office documents (Open Document and M
 * Plaintext format. File content is UTF-8, control structures are ASCII.
 * Human-readable content (everything that is some kind of "text" in a broader sense) shall be human-readable in the archive, too.
 * Non-textual (e.g. images, audio) content might be presented in a text-alike format, if possible
-* extensible encoder/decoder for different file types / content types
+* extensible encoder/decoder ("codec") for different file types / content types
   * human-readable meta data 
   * compressed files are stored uncompressed
   * container files (storing several individual files) are stored file-by-file
   * "minified" XML and JSON files are stored beautified and well-indented
   * binary files that cannot be converted sensibly in a text form are stored in Siso93 format, that allows chunking
   * bitmap images can contain an ASCII "thumbnail" to give a visual hint about changes in the image (optional)
+
+## File format description
+
+Every gar file starts with a common header that marks it as gar file, contains a version number and the "codec" that was used to encode the original file content. Some codecs, e.g. codecs for archive file formats, split the file in independent "chunks" that might be encoded by their own codecs, whatever might be most appropriate for every chunk.
+
+Every codec ensures, that no file content can be encoded into output that can be interpreted as gar header, footer or chunk headers.
+
+### Header
+
+The header consists of one line, terminated by newline:
+
+* `<#gar#2.0#` _codec_ [`#` _parameters_ ] `#>`
+
+* The spaces shown in the header line are just for illustration.
+* The parameters are optional and codec-specific.
+* The "newline" might be a single NL character or a CR-NL sequence.
+
+### Footer
+
+Every gar file ends with a footer line, terminated also by a newline:
+
+* `<#endgar` [`#sha256=` _sha256-sum_ ] `#>` 
+
+* The spaces shown in the footer line are just for illustration.
+* The SHA-256 sum is optional. It is computed on the original (unencoded) file content and might either be 64 hex digits (0-9a-f), or truncated to the first 16 or 32 hex digits.
+* The "newline" might be a single NL character or a CR-NL sequence.
