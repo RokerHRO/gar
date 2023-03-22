@@ -30,7 +30,7 @@ First goal is to enable this for XML-based office documents (Open Document and M
 
 Every gar file starts with a common header that marks it as gar file, contains a version number and the "codec" that was used to encode the original file content. Some codecs, e.g. codecs for archive file formats, split the file in independent "chunks" that might be encoded by their own codecs, whatever might be most appropriate for every chunk.
 
-Every codec ensures, that no file content can be encoded into output that can be interpreted as gar header, footer or chunk headers.
+Every codec ensures, that no file content can be encoded into output that can be interpreted as gar header, footer or chunk header lines.
 
 ### Header
 
@@ -51,3 +51,15 @@ Every gar file ends with a footer line, terminated also by a newline:
 * The spaces shown in the footer line are just for illustration.
 * The SHA-256 sum is optional. It is computed on the original (unencoded) file content and might either be 64 hex digits (0-9a-f), or truncated to the first 16 or 32 hex digits.
 * The "newline" might be a single NL character or a CR-NL sequence.
+
+### Chunk header line
+
+A chunk header consists of one line, terminated by newline:
+
+* `<|` _codec_ [ `|` _parameters_ ] [ `|"` _chunkname_ `"` ] `|>`
+
+* The spaces shown in the footer line are just for illustration.
+* The parameters are optional and a comma-separated key-value list. Their meaning is codec-specific.
+* The chunk name is optional and a JSON string in double-quotes.
+* The "newline" might be a single NL character or a CR-NL sequence.
+* There is no "chunk footer".
