@@ -28,9 +28,9 @@ First goal is to enable this for XML-based office documents (Open Document and M
 
 ## File format description
 
-Every gar file starts with a common header that marks it as gar file, contains a version number and the "codec" that was used to encode the original file content. Some codecs, e.g. codecs for archive file formats, split the file in independent "chunks" that might be encoded by their own codecs, whatever might be most appropriate for every chunk.
+Every gar file starts with a common header that marks it as gar file, contains a version number and the "codec" that was used to encode the original file content. Some codecs (e.g. codecs for archive file formats) split the gar file in independent "chapters" (e.g. one for each archived file) that might be encoded by their own codecs, whatever might be most appropriate for every chapter.
 
-Every codec ensures, that no file content can be encoded into output that can be interpreted as gar header, footer or chunk header lines.
+Every codec ensures, that no file content can be encoded into output that can be interpreted as gar header, footer or chapter header lines.
 
 ### Header
 
@@ -52,15 +52,15 @@ Every gar file ends with a footer line, terminated also by a newline:
 * The SHA-256 sum is optional. It is computed on the original (unencoded) file content and might either be 64 hex digits (0-9a-f), or truncated to the first 16 or 32 hex digits.
 * The "newline" might be a single NL character or a CR-NL sequence.
 
-### Chunk header line
+### Chapter header line
 
-A chunk header consists of one line, terminated by newline:
+A chapter header consists of one line, terminated by newline:
 
-> `<|` _codec_ [ `|` _parameters_ ] [ `|"` _chunkname_ `"` ] `|>`
+> `<|` _codec_ [ `|` _parameters_ ] [ `|"` _chapter_name_ `"` ] `|>`
 
 * The spaces shown in the footer line are just for illustration.
 * The parameters are optional and a comma-separated key-value list. Their meaning is codec-specific.
-* The chunk name is optional and a JSON string in double-quotes.
+* The chapter name is optional and a JSON string in double-quotes.
 * The "newline" might be a single NL character or a CR-NL sequence.
 * There is no "chunk footer".
 
@@ -75,9 +75,9 @@ A chunk header consists of one line, terminated by newline:
 #### siso93 – tagged encoding for arbitrary binary data
 * All data that is not "plaintext" – and doesn't have a format-specific codec – is considered as "binary" data and encoded with this codec.
 * Unlike base64 or base85 this encoding keeps ASCII text snippets in the data human-readable. To make it diff-friendly (a local change, insertion od deletion of data results in a small diff) a special encoding is used:
-* * A rolling checksum is used to split the data in content-dependent chunks. The minimum & maximum lenghts of the chunks can be configured.
-* * Within each chunk every 4 (binary data) octets are encoded into 1 "tag" char and 4 "data" chars. These chars are only printable ASCII chars.
-* * Each chunk is encoded in one "tag line", followed by one "data line".
+  1. A rolling checksum is used to split the data in content-dependent chunks. The minimum & maximum lenghts of the chunks can be configured.
+  2. Within each chunk every 4 (binary data) octets are encoded into 1 "tag" char and 4 "data" chars. These chars are only printable ASCII chars.
+  3. Each chunk is encoded in one "tag line", followed by one "data line".
 
 #### xmltidy - pretty-printed XML
 * XML data that is stored "pretty-printed" with proper line breaks and indentation, making it diff-friendly
@@ -87,3 +87,5 @@ A chunk header consists of one line, terminated by newline:
 * JSON data that is stored "pretty-printed" with proper line breaks and indentation, making it diff-friendly
 * Because the original layout of the JSON data is lost, **this codec is not reversible!**
 
+#### zip – for ZIP files, JAR archives, office files, too (Open Document and Microsoft's OOXML)
+* 
