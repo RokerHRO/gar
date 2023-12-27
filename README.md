@@ -88,4 +88,31 @@ A chapter header consists of one line, terminated by newline:
 * Because the original layout of the JSON data is lost, **this codec is not reversible!**
 
 #### zip – for ZIP files, JAR archives, office files, too (Open Document and Microsoft's OOXML)
-* 
+* The files in the ZIP file are stored as "chapters" in the gar file, in the same order as in he original ZIP file.
+* Same data can be compressed differently by different ZIP encoders and not all ZIP metadata are represented exactly in gar, so **this codec is no reversible!**
+* Nested ZIP files (ZIP file containing another ZIP file) shall be stored in a "flattened" way to avoid double-encoding of the content of the inner ZIP file:
+
+``` 
+    outer.zip
+    ├ readme.txt
+    ├ inner.zip
+    │ ├ foo.txt 
+    │ └ bar.txt
+    └ other.txt
+```
+It would look as gar file this way:
+
+```
+<#gar#2.0#zip#version_made_by=0x33F#>
+<|plain|charset=utf8|"readme.txt"|>
+This is the content of the readme.txt file.
+Any gar-specific markup must be escaped here.
+<|zip|version_mady_by=0x33F|id=123|"inner.zip"|>
+<|plain|charset=utf8|parent=123|"foo.txt"|>
+This is content of foo.txt
+<|plain|charset=utf8|parent=123|"bar.txt"|>
+This is content of bar.txt
+<|plain|charset=utf8|"other.txt"|>
+This is the content of other.txt
+<#endgar#>
+```
