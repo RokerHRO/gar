@@ -90,7 +90,7 @@ A chapter header consists of one line, terminated by newline:
 #### zip – for ZIP files, JAR archives, office files, too (Open Document and Microsoft's OOXML)
 * The files in the ZIP file are stored as "chapters" in the gar file, in the same order as in he original ZIP file.
 * Same data can be compressed differently by different ZIP encoders and not all ZIP metadata are represented exactly in gar, so **this codec is no reversible!**
-* Nested ZIP files (ZIP file containing another ZIP file) shall be stored in a "flattened" way to avoid double-encoding of the content of the inner ZIP file:
+* Nested ZIP files (ZIP file containing another ZIP file) shall be stored in a "flattened" way to avoid double-encoding of the content of the inner ZIP file. The files are linked to their ZIP container via "id" and "parent":
 
 ``` 
     outer.zip
@@ -113,6 +113,6 @@ This is content of foo.txt
 <|plain|charset=utf8|parent=123|"bar.txt"|>
 This is content of bar.txt
 <|plain|charset=utf8|"other.txt"|>
-This is the content of other.txt
+This is the content of other.txt, _not_ part of the inner.zip!
 <#endgar#>
 ```
