@@ -9,6 +9,9 @@
 #include <stdexcept>
 #endif
 
+using namespace std::string_literals;
+
+
 namespace
 {
 
@@ -204,7 +207,6 @@ void check_tables()
 	fprintf(html, "</tr></table><p>");
 	
 	fprintf(html, "<h2>Tag bytes</h2><table border=\"1\">\n");
-	bool tag_bytes_okay = true;
 	std::set<char> tag_set;
 	for(unsigned u=0; u<3*3*3*3; ++u)
 	{
@@ -240,6 +242,7 @@ void check_tables()
 } // end of anonymous namespace
 
 
+
 std::pair<std::string, std::string> encode_siso93(std::string_view s)
 {
 	std::string tag, data;
@@ -261,9 +264,9 @@ std::pair<std::string, std::string> encode_siso93(std::string_view s)
 		data += encoding_value[ U8(s[o+3]) ];
 	}
 	
-	const unsigned* factor = factors;
 	if(max_size < s.size())
 	{
+		const unsigned* factor = factors;
 		unsigned t = 0;
 		size_t o = max_size;
 		while(o < s.size())
@@ -281,7 +284,66 @@ std::pair<std::string, std::string> encode_siso93(std::string_view s)
 
 std::string decode_siso93(std::string_view tag, std::string_view data)
 {
-	return std::string{};
+	if(tag.size()>=2 && tag[0]=='>' && tag[1]==' ')
+	{
+		tag.remove_prefix(2); // skip the "> " prefix
+	}
+	
+	if((data.size()+3)/4 != tag.size())
+	{
+		throw std::runtime_error("Data and tag size don't match!");
+	}
+	
+	std::string ret;
+	ret.reserve(data.size());
+	const size_t max_full_quad = data.size()/4;
+	for(size_t q = 0; q<max_full_quad; ++q)
+	{
+		const int8_t (&dtag)[4] = decoding_tag[ uint8_t(tag[q]) ];
+		if(dtag[0]<0)
+			throw std::runtime_error("Illegal tag byte '"s + tag[q] + "' at postition " + std::to_string(q));
+		
+		const size_t q4 = q*4;
+		const uint8_t c0 = data[q4];
+		const int16_t i0 = decoding_value[dtag[0]][c0];
+		
+		const uint8_t c1 = data[q4+1];
+		const int16_t i1 = decoding_value[dtag[1]][c1];
+		
+		const uint8_t c2 = data[q4+2];
+		const int16_t i2 = decoding_value[dtag[2]][c2];
+		
+		const uint8_t c3 = data[q4+3];
+		const int16_t i3 = decoding_value[dtag[3]][c3];
+		
+		if(i0<0 || i1<0 || i2<0 || i3<0)
+			throw std::runtime_error("Illegal data byte(s) at position " + std::to_string(q4));
+		
+		ret += char(i0);
+		ret += char(i1);
+		ret += char(i2);
+		ret += char(i3);
+	}
+	
+	const size_t q4 = max_full_quad*4;
+	if(q4 < data.size())
+	{
+		const int8_t (&dtag)[4] = decoding_tag[ uint8_t(tag.back()) ];
+		if(dtag[0]<0)
+			throw std::runtime_error("Illegal tag byte '"s + tag.back() + "' at last postition");
+		
+		for(size_t q=0; q4+q < data.size(); ++q)
+		{
+			const uint8_t c0 = data.at(q4+q);
+			const int16_t i0 = decoding_value[dtag[0]][c0];
+			if(i0<0)
+				throw std::runtime_error("Illegal data byte at position " + std::to_string(q4+q));
+			
+			ret += char(i0);
+		}
+	}
+	
+	return ret;
 }
 
 #ifdef PRINT_DECODING_TABLES
