@@ -1,6 +1,13 @@
 #include "siso93.hh"
 #include <cstdint>
 
+// #define PRINT_DECODING_TABLES 1
+
+#ifdef PRINT_DECODING_TABLES
+#include <cstdio>
+#include <set>
+#include <stdexcept>
+#endif
 
 namespace
 {
@@ -18,7 +25,7 @@ const char* const encoding_value =
 	"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[4]^7" // Cx .. Dx
 	"`abcdefghijklmnopqrstuvwxyz{|}~!";// Ex .. Fx
 
-char encoding_plane[257] =
+const char encoding_plane[257] =
 //	 0123456789abcdef.123456789abcdef
 	"\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001\001" // 0x .. 1x
 	"\000\000\001\000\000\000\001\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\001\000\001\000" // 2x .. 3x
@@ -44,6 +51,119 @@ const char* const encoding_tag =
 
 
 static const unsigned factors[4] = {27, 9, 3, 1};
+
+#ifdef PRINT_DECODING_TABLES
+
+static int16_t decoding_value[3][256];
+static int8_t decoding_tag[256][4];
+
+std::string pp(unsigned c)
+{
+    static char pretty_print[16];
+    if(c>=' ' && c<='~')
+    {
+        snprintf(pretty_print, 15, " '%c'", c);
+    }else{
+        snprintf(pretty_print, 15, "0x%02X", c);
+    }
+    return pretty_print;
+}
+
+void generate_decoding_tables()
+{
+    printf("// THIS FILE IS GENERATED. DO NOT EDIT IT!\n"
+           "\n"
+           "#include <cstdint>\n"
+           "\n");
+
+    for(unsigned u = 0; u < 256; ++u)
+    {
+        decoding_value[0][u] = decoding_value[1][u] = decoding_value[2][u] = -1;
+        decoding_tag[u][0] = decoding_tag[u][1] = decoding_tag[u][2] = decoding_tag[u][3] = -1;
+    }
+
+    // data
+    for(unsigned u = 0; u < 256; ++u)
+    {
+        const unsigned char e = encoding_value[u];
+        const unsigned char t = encoding_plane[u];
+        decoding_value[t][e] = u;
+    }
+
+    // tag
+    for(int t0=0; t0<=2; ++t0)
+    for(int t1=0; t1<=2; ++t1)
+    for(int t2=0; t2<=2; ++t2)
+    for(int t3=0; t3<=2; ++t3)
+    {
+        const unsigned tag = t0*27 + t1*9 + t2*3 + t3;
+        const unsigned char tc = encoding_tag[tag];
+        decoding_tag[tc][0] = t0;
+        decoding_tag[tc][1] = t1;
+        decoding_tag[tc][2] = t2;
+        decoding_tag[tc][3] = t3;
+    }
+
+    printf("static const int16_t decoding_value[3][256] = {\n");
+    for(unsigned plane=0; plane<=2; ++plane)
+    {
+        printf("\t{\n");
+        for(unsigned c=0; c<256; ++c)
+        {
+            printf("%s%3i%s", (c%16==0 ? "\t\t":" "), decoding_value[plane][c], (c==255?" ":","));
+            if(c%16 == 15)
+            {
+                printf(" // %s ... %s\n", pp(c-15).c_str(), pp(c).c_str());
+            }
+        }
+        printf("\t}%s\n", (plane==2 ? "" : ","));
+    }
+    printf("};\n\n");
+
+    printf("static const int8_t decoding_tag[256][4] = {\n");
+    for(unsigned c=0; c<256; ++c)
+    {
+        printf("%s{%2i, %2i, %2i, %2i}%s", (c%4==0 ? "\t\t":" "), decoding_tag[c][0], decoding_tag[c][1], decoding_tag[c][2], decoding_tag[c][3], (c==255?" ":","));
+        if(c%4 == 3)
+        {
+            printf(" // %s %s %s %s\n", pp(c-3).c_str(), pp(c-2).c_str(), pp(c-1).c_str(), pp(c).c_str());
+        }
+
+    }
+    printf("};\n\n// END OF GENERATED FILE\n");
+}
+
+void check_tables()
+{
+    std::set< std::pair<char, char> > data_set;
+    for(unsigned u=0; u<256; ++u)
+    {
+        auto [iter, b] = data_set.insert(std::make_pair(encoding_value[u], encoding_plane[u]));
+        printf("// data 0x%02X : %c %u\n", u, encoding_value[u], encoding_plane[u]);
+        if(b==false)
+        {
+         //   throw std::logic_error("encodig_value/plane table invalid at entry #" + std::to_string(u));
+            printf("ERROR at entry 0x%02X!\n", u);
+        }
+    }
+
+    std::set<char> tag_set;
+    for(unsigned u=0; u<3*3*3*3; ++u)
+    {
+        auto [iter, b] = tag_set.insert(encoding_tag[u]);
+        printf("// tag 0x%02X : %c \n", u, encoding_tag[u]);
+        if(b==false)
+        {
+//            throw std::logic_error("encoding_tag table invalid at entry #" + std::to_string(u));
+            printf("ERROR at tag entry 0x%02X!\n", u);
+        }
+    }
+}
+#else
+
+#include "decoding_tables.cc"
+
+#endif // PRINT_DECODING_TABLES
 
 } // end of anonymous namespace
 
@@ -86,3 +206,18 @@ std::pair<std::string, std::string> encode_siso93(std::string_view s)
 	
 	return std::make_pair(std::move(tag), std::move(data));
 }
+
+std::string decode_siso93(std::string_view tag, std::string_view data)
+{
+    return std::string{};
+}
+
+#ifdef PRINT_DECODING_TABLES
+
+int main()
+{
+    check_tables();
+    generate_decoding_tables();
+}
+
+#endif
