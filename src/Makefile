@@ -10,10 +10,13 @@ clean:
 %.o: %.cc %.hh
 	$(CXX) -c -o $@ $<
 
+siso93.o: siso93.cc siso93.hh decoding_tables.cc
+	$(CXX) -c -o $@ $<
+
 decoding_tables.cc : generate_decoding_tables
 	./generate_decoding_tables > $@
 
-gar: decoding_tables.cc siso93.o rolling_hash.o
+gar: siso93.o rolling_hash.o
 	$(CXX) -o $@ $^
 
 
