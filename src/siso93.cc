@@ -23,7 +23,7 @@ const char* const encoding_value =
 	"`abcdefghijklmnopqrstuvwxyz{|}~." // 8x .. 9x
 	"_!0#$%#'()*+,-./0123456789:;1=3?" // Ax .. Bx
 	"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[4]^7" // Cx .. Dx
-	"`abcdefghijklmnopqrstuvwxyz{|}~!";// Ex .. Fx
+	"`abcdefghijklmnopqrstuvwxyz{|}~=";// Ex .. Fx
 
 const char encoding_plane[257] =
 //	 0123456789abcdef.123456789abcdef
@@ -47,7 +47,7 @@ const char* const encoding_tag =
 	"fghopqxyz" // 12
 	";129[]FI(" // 20
 	"345{}A)=#" // 21
-	"657BCD*$%";// 22
+	"678BCD*$%";// 22
 
 
 static const unsigned factors[4] = {27, 9, 3, 1};
