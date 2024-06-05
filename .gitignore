@@ -1,3 +1,10 @@
+
+*~
+src/tables.html
+src/decoding_tables.cc
+src/gar
+src/generate_decoding_tables
+
 # Prerequisites
 *.d
 
@@ -15,6 +22,7 @@
 *.so
 *.dylib
 *.dll
+*.dSYM
 
 # Fortran module files
 *.mod
