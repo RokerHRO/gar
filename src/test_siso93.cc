@@ -64,3 +64,26 @@ TEST_P( Siso93Test, Decoder )
 	
 	EXPECT_EQ(param.input, dec);
 }
+
+TEST( Siso93Test, FullScan )
+{
+	union {
+		uint64_t u = 0;
+		char buffer[8];
+	};
+	
+	for(unsigned length = 1 ; length <= 5; ++length)
+	{
+		fprintf(stderr, "len=%u \n", length);
+		const uint64_t max_val = 1ull << (8ull*length);
+		
+#pragma omp parallel for
+		for(u=0; u<max_val; ++u)
+		{
+			std::string_view sv{buffer, length};
+			auto enc = encode_siso93(sv);
+			const std::string dec = decode_siso93(enc.first, enc.second);
+			EXPECT_EQ(sv, dec);
+		}
+	}
+}

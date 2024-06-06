@@ -1,6 +1,6 @@
 .PHONY: all test clean
 
-CXX=g++ -g -std=c++17 -O3 -Wall
+CXX=g++ -g -std=c++17 -O3 -Wall -fopenmp
 
 all: gar
 
@@ -10,10 +10,10 @@ test: test_siso93
 clean:
 	rm -rvf  *.o gar
 
-%.o: %.cc %.hh
+%.o: %.cc %.hh Makefile
 	$(CXX) -c -o $@ $<
 
-siso93.o: siso93.cc siso93.hh decoding_tables.cc
+siso93.o: siso93.cc siso93.hh decoding_tables.cc Makefile
 	$(CXX) -c -o $@ $<
 
 decoding_tables.cc : generate_decoding_tables
