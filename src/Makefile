@@ -1,8 +1,11 @@
-.PHONY: all clean
+.PHONY: all test clean
 
 CXX=g++ -g -std=c++17 -O3 -Wall
 
 all: gar
+
+test: test_siso93
+	./test_siso93
 
 clean:
 	rm -rvf  *.o gar
@@ -19,6 +22,8 @@ decoding_tables.cc : generate_decoding_tables
 gar: siso93.o rolling_hash.o
 	$(CXX) -o $@ $^
 
+test_siso93: test_siso93.o siso93.o
+	$(CXX) -o $@ $^ -lgtest -lgtest_main
 
 generate_decoding_tables: siso93.cc siso93.hh
 	$(CXX) -DPRINT_DECODING_TABLES -o $@ $<

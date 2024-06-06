@@ -4,6 +4,7 @@ src/tables.html
 src/decoding_tables.cc
 src/gar
 src/generate_decoding_tables
+src/test_siso93
 
 # Prerequisites
 *.d
