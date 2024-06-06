@@ -335,7 +335,7 @@ std::string decode_siso93(std::string_view tag, std::string_view data)
 		for(size_t q=0; q4+q < data.size(); ++q)
 		{
 			const uint8_t c0 = data.at(q4+q);
-			const int16_t i0 = decoding_value[dtag[0]][c0];
+			const int16_t i0 = decoding_value[dtag[q]][c0];
 			if(i0<0)
 				throw std::runtime_error("Illegal data byte at position " + std::to_string(q4+q));
 			
