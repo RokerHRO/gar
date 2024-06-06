@@ -20,10 +20,10 @@ decoding_tables.cc : generate_decoding_tables
 	./generate_decoding_tables > $@
 
 gar: siso93.o rolling_hash.o
-	$(CXX) -o $@ $^
+	$(CXX) -o $@ $^ -lpthread
 
 test_siso93: test_siso93.o siso93.o
-	$(CXX) -o $@ $^ -lgtest -lgtest_main
+	$(CXX) -o $@ $^ -lgtest -lgtest_main -lpthread
 
 generate_decoding_tables: siso93.cc siso93.hh
 	$(CXX) -DPRINT_DECODING_TABLES -o $@ $<

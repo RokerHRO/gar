@@ -1,12 +1,12 @@
 #include "siso93.hh"
 #include <cstdint>
+#include <stdexcept>
 
 // #define PRINT_DECODING_TABLES 1
 
 #ifdef PRINT_DECODING_TABLES
 #include <cstdio>
 #include <set>
-#include <stdexcept>
 #endif
 
 using namespace std::string_literals;
