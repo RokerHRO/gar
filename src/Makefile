@@ -1,6 +1,6 @@
 .PHONY: all test clean
 
-CXX=g++ -g -std=c++17 -O3 -Wall -fopenmp
+CXX=g++ -g -std=c++17 -O3 -Wall # -fopenmp
 
 all: gar
 

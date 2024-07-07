@@ -166,10 +166,18 @@ void check_tables()
 		".p0 { background-color: #fff; }\n"
 		".p1 { background-color: #ec8; }\n"
 		".p2 { background-color: #8be; }\n"
+		".p3 { background-color: #fcc; }\n" // only for tag byte table
+		".shadow { margin-left: 2em; box-shadow: 5px 5px 5px #ccc; border: thin solid black; border-collapse:collapse;}\n"
+		"th,td { padding: 3px; }\n"
+		"table { margin-bottom: 1em; }\n"
+		".top { border-bottom: 3px solid black; }\n"
+		".left { border-right: 3px solid black; }\n"
 		"</style>"
 		"<title>Siso93 generated encoding tables</title></head>\n"
-		"<body><h2>Data bytes</h2><table border=\"1\">\n"
-		"<tr><th>\\</th>"
+		"<body><h2>Data bytes</h2>"
+		"<table><tr valign=\"top\"><td>"
+		"<table border=\"1\" class=\"shadow\">\n"
+		"<tr class=\"top\"><th class=\"top left\">\\</th>"
 		);
 	for(unsigned low=0; low<16; ++low)
 		fprintf(html, "<th>…%X</th>", low);
@@ -180,7 +188,7 @@ void check_tables()
 		const char* css_class = "";
 		if(u%16 ==0)
 		{
-			fprintf(html,"</tr>\n<tr><th>%X…</th>", u/16);
+			fprintf(html,"</tr>\n<tr><th class=\"left\">%X…</th>", u/16);
 		}
 		const char value = encoding_value[u];
 		used_chars.insert(value);
@@ -194,8 +202,8 @@ void check_tables()
 		}
 		fprintf(html, "<td class=\"%s p%u\">%s</td>", css_class, plane, html_escape(value).c_str());
 	}
-	fprintf(html, "</tr></table><p>");
-	fprintf(html, "<h3>Unused combinations</h3><table border=\"1\"><tr>");
+	fprintf(html, "</tr></table>\n<p>\n");
+	fprintf(html, "<h3>Unused combinations</h3>\n<table border=\"1\" class=\"shadow\"><tr>");
 	for(const char c : used_chars)
 	for(int plane = 0; plane<3; ++plane)
 	{
@@ -204,9 +212,18 @@ void check_tables()
 			fprintf(html, "<td class=\"p%u\">&nbsp;%s&nbsp;</td>", plane, html_escape(c).c_str());
 		}
 	}
-	fprintf(html, "</tr></table><p>");
+	fprintf(html, "</tr></table>"
+		"</td><td style=\"padding-left:2em;\">Legend:<ul>"
+		"<li><table border=\"1\" style=\"border-collapse:collapse;\"><tr><td class=\"p0\">Plane 0</td></tr></table></li>\n"
+		"<li><table border=\"1\" style=\"border-collapse:collapse;\"><tr><td class=\"p1\">Plane 1</td></tr></table></li>\n"
+		"<li><table border=\"1\" style=\"border-collapse:collapse;\"><tr><td class=\"p2\">Plane 2</td></tr></table></li>\n"
+		"</ul></td></tr></table>"
+		"<hr>\n");
 	
-	fprintf(html, "<h2>Tag bytes</h2><table border=\"1\">\n");
+	fprintf(html, "<h2>Tag bytes</h2>\n<table class=\"inv\"><tr valign=\"top\"><td>"
+		"<table border=\"1\" class=\"shadow\">\n"
+		"<tr class=\"top\"><th>Byte</th><th>Planes</th><th>Tag</th></tr>\n"
+		);
 	std::set<char> tag_set;
 	for(unsigned u=0; u<3*3*3*3; ++u)
 	{
@@ -220,7 +237,27 @@ void check_tables()
 		}
 		fprintf(html, "<tr><td>0x%02X</td><td>%i %i %i %i</td><td class=\"%s\">&nbsp;%s&nbsp;</td></tr>", u, u/27, (u/9)%3, (u/3)%3, u%3, css_class, html_escape(tag).c_str());
 	}
-	fprintf(html, "</table>\n<h3>Unused tag bytes</h3><table border=\"1\"><tr>");
+	fprintf(html, "</table></td><td><table border=\"1\" class=\"shadow\">"
+		"<tr class=\"top\"><th class=\"top left\">\\</th>");
+	for(unsigned u=0; u<3*3; ++u)
+	{
+		const char* css_class = (u==2 || u==5 ? " class=\"left\"" : "");
+		fprintf(html, "<th%s>%u %u</th>", css_class, u/3, u%3);
+	}
+	for(unsigned v=0; v<3*3; ++v)
+	{
+		const char* css_class = (v==2 || v==5 ? " class=\"top\"" : "");
+		fprintf(html, "</tr><tr%s><th class=\"left\">%u %u</th>", css_class, v/3, v%3);
+		for(unsigned u=0; u<3*3; ++u)
+		{
+			const char* css_class = (u==2 || u==5 ? " left" : "");
+			const char tag = encoding_tag[v*9+u];
+			fprintf(html, "<td class=\"p%u%s\">%s</td>", 3 * (((u/3)&1) ^ ((v/3)&1)), css_class, html_escape(tag).c_str() );
+		}
+	}
+	
+	fprintf(html, "</tr></table></td></tr></table>\n"
+		"<h3>Unused tag bytes</h3><table border=\"1\" class=\"shadow\"><tr>");
 	for(const char c : used_chars)
 	{
 		if(tag_set.count(c)==0)
