@@ -130,8 +130,9 @@ private:
 
 int main(int argc, char** argv)
 {
-	const std::string es = "Banane";
-
+	uint64_t line_lengths = 0;
+	uint64_t lines = 0;
+	
 	int opt = -42;
 	unsigned min_len = 40;
 	unsigned max_len = 256;
@@ -171,6 +172,8 @@ int main(int argc, char** argv)
 		
 		if( h <= lb.break_hash(line.size()) )
 		{
+			line_lengths += line.length();
+			++lines;
 			const auto [tag,data] = encode_siso93(line);
 			printf("> %s\n%s\n", tag.c_str(), data.c_str());
 			fflush(stdout);
@@ -178,4 +181,5 @@ int main(int argc, char** argv)
 		}
 	}
 	
+	fprintf(stderr, "Average line length: %f bytes.\n", double(line_lengths)/lines );
 }
