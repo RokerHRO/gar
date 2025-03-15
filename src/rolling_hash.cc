@@ -17,6 +17,13 @@ uint64_t Pow(uint64_t basis, unsigned exponent)
 	return exponent ? Pow(basis, exponent-1) * basis : 1 ;
 }
 
+static constexpr
+uint64_t sqr(uint32_t u)
+{
+	return uint64_t{u}*u;
+//	return u;
+}
+
 
 struct RollingHash
 {
@@ -91,7 +98,6 @@ private:
 		
 		return u;
 	}
-	
 };
 
 
@@ -101,8 +107,7 @@ public:
 	LineBreaker(unsigned min_length, unsigned max_length)
 	: LineLengthMin(min_length)
 	, LineLengthMax(max_length)
-	, LineLengthStretch{LineLengthMax - LineLengthMin}
-	, HashStep{UINT64_MAX / LineLengthStretch}
+	, HashStep{UINT64_MAX / sqr(LineLengthMax - LineLengthMin)}
 	{
 		fprintf(stderr, "# LineLen: %u ... %u\n HashStep: 0x%016llx.\n", LineLengthMin, LineLengthMax, (unsigned long long)HashStep);
 		
@@ -117,13 +122,12 @@ public:
 		if(length<=LineLengthMin) return 0;
 		if(length>=LineLengthMax) return ~uint64_t(0);
 		
-		return (length-LineLengthMin) * HashStep;
+		return sqr(length-LineLengthMin) * HashStep;
 	}
 
 private:
 	const unsigned LineLengthMin;
 	const unsigned LineLengthMax;
-	const unsigned LineLengthStretch;
 	const uint64_t HashStep;
 };
 
