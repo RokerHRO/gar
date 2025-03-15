@@ -8,7 +8,7 @@ test: test_siso93
 	./test_siso93
 
 clean:
-	rm -rvf  *.o gar
+	rm -rvf  decoding_tables.cc *.o gar generate_decoding_tables
 
 %.o: %.cc %.hh Makefile
 	$(CXX) -c -o $@ $<
