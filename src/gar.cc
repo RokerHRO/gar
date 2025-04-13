@@ -1,8 +1,7 @@
 #include "gar.hh"
 #include <string>
 
-
-std::string slurp(const std::string_view filename)
+std::string slurp(std::string_view filename)
 {
     std::ifstream input(filename.c_str(), std::ios_base::binary);
     if(!input)
