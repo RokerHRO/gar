@@ -1,13 +1,19 @@
 #include "bin_codec.hh"
 #include <string>
 
-std::string BinCodec::encode(std::string_view filename)
+BinCodec::BinCodec(unsigned min_line_length, unsigned max_line_length)
+: hash{}
+, breaker{min_line_length, max_line_length}
+{}
+
+
+std::string BinCodec::encode(std::string_view input)
 {
 
 }
 
 
-std::string BinCodec::decode(std::string_view filename)
+std::string BinCodec::decode(std::string_view input)
 {
 
 }
@@ -15,7 +21,7 @@ std::string BinCodec::decode(std::string_view filename)
 
 BinCodec* BinCodec::getDefaultCodec()
 {
-	static BinCodec process_bin;
+	static BinCodec process_bin{64, 1024};
 	return &process_bin;
 }
 
