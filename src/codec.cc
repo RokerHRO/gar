@@ -16,3 +16,15 @@ const std::map<std::string_view, Codec*>  filetype2codec =
 		{ "zip", ZipCodec::getDefaultCodec() },
 		{ "bin", BinCodec::getDefaultCodec() },
 	};
+
+
+Codec* getCodecByExtension(std::string_view extension)
+{
+	auto f = extension2codec.find(extension);
+	if (f == extension2codec.end())
+	{
+		f = extension2codec.find("");
+	}
+	
+	return f->second;
+}

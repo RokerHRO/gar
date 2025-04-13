@@ -24,6 +24,9 @@ extern const CodecList  extension2codec;
 extern const CodecList  filetype2codec;
 
 
+Codec* getCodecByExtension(std::string_view extension);
+
+
 inline
 CodecList operator+(CodecList head, const std::initializer_list<CodecPair>& tail)
 {

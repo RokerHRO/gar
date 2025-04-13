@@ -26,6 +26,7 @@ const std::initializer_list< CodecPair >& getBinCodecs()
 
 	static const std::initializer_list<CodecPair> data =
 	{
+		{"",    codec_bin},
 		{"png", codec_bin},
 		{"jpg", codec_bin},
 	};
