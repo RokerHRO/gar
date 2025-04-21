@@ -52,6 +52,13 @@ std::string BinCodec::decode(std::string_view input)
 {
 	std::string ret;
 	
+	std::string_view tag, data;
+	while(!eof(input))
+	{
+		tag = getline(input);
+		data = getline(input);
+		ret += decode_siso93(tag, data);
+	}
 	
 	return ret;
 }
