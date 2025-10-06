@@ -1,13 +1,13 @@
 #include "zip_codec.hh"
 #include <string>
 
-std::string ZipCodec::encode(std::string_view filename)
+std::string ZipCodec::encode(std::string_view input)
 {
 
 }
 
 
-std::string ZipCodec::decode(std::string_view filename)
+std::string ZipCodec::decode(std::string_view input)
 {
 
 }
